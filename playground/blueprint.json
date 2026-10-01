@@ -13,12 +13,8 @@
 	"features": {
 		"networking": true
 	},
-	"login": true,
+	"login": false,
 	"steps": [
-		{
-			"step": "setSiteLanguage",
-			"language": "fr_FR"
-		},
 		{
 			"step": "installPlugin",
 			"pluginData": {
@@ -41,6 +37,10 @@
 				"activate": true,
 				"targetFolderName": "grind"
 			}
+		},
+		{
+			"step": "setSiteLanguage",
+			"language": "fr_FR"
 		},
 		{
 			"step": "runPHP",
