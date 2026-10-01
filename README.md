@@ -19,4 +19,4 @@ Le contenu (produit, réglages WooCommerce) est en base de données et n'est pas
 
 ## Démo en ligne
 
-[Ouvrir dans WordPress Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/antoineblondel77-ship-it/grind-shop/main/playground/blueprint.json) — WordPress + WooCommerce dans le navigateur, produit créé automatiquement (`playground/blueprint.json`). Chaque visite repart d'une copie neuve.
+[Ouvrir dans WordPress Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/antoineblondel77-ship-it/grind-shop/main/playground/blueprint.json&mode=seamless) — WordPress + WooCommerce dans le navigateur, produit créé automatiquement (`playground/blueprint.json`). Chaque visite repart d'une copie neuve.
