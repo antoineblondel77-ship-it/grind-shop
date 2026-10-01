@@ -16,6 +16,7 @@ update_option( 'woocommerce_price_decimal_sep', ',' );
 update_option( 'woocommerce_price_thousand_sep', ' ' );
 update_option( 'woocommerce_coming_soon', 'no' );
 update_option( 'woocommerce_store_pages_only', 'no' );
+update_user_meta( 1, 'show_admin_bar_front', 'false' ); // démo plus propre
 update_option( 'woocommerce_permalinks', array( 'product_base' => '/produit', 'category_base' => 'categorie', 'tag_base' => 'etiquette', 'attribute_base' => '', 'use_verbose_page_rules' => false ) );
 
 // Pages WooCommerce en français.
