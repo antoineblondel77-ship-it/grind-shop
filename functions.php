@@ -5,7 +5,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GRIND_VERSION', '0.3.5' );
+define( 'GRIND_VERSION', '0.3.6' );
 
 require_once __DIR__ . '/inc/drop.php';
 
