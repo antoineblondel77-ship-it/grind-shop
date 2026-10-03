@@ -128,6 +128,31 @@ $total = $product ? grind_total_stock( $product ) : null;
 	</div>
 </section>
 
+<?php $spotify = '2hbINRr5c5L1ghgMnPv25i'; ?>
+<section class="listen" aria-labelledby="listen-title">
+	<div class="listen__bgtext" aria-hidden="true">GUTS</div>
+	<div class="wrap listen__grid">
+		<a class="listen__deck" href="https://open.spotify.com/artist/<?php echo esc_attr( $spotify ); ?>" target="_blank" rel="noopener" aria-label="Écouter GUTS sur Spotify">
+			<span class="listen__card">
+				<span class="listen__vinyl" aria-hidden="true"><span class="listen__label">GUTS</span></span>
+				<span class="listen__sleeve">
+					<img src="<?php echo grind_asset( 'img/sleeve.jpg' ); ?>" alt="" loading="lazy">
+					<span class="listen__glare"></span>
+				</span>
+				<span class="listen__sticker" aria-hidden="true"><b>Parental</b> Advisory <i>Explicit content</i></span>
+			</span>
+		</a>
+
+		<div class="listen__body">
+			<p class="eyebrow">En écoute</p>
+			<h2 id="listen-title" class="listen__title">GUTS <em>sur Spotify</em></h2>
+			<p class="listen__text">Le son derrière le drop. Abonne-toi pour ne rater aucune sortie.</p>
+			<iframe class="listen__embed" src="https://open.spotify.com/embed/artist/<?php echo esc_attr( $spotify ); ?>?utm_source=generator&amp;theme=0" title="GUTS sur Spotify" height="352" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+			<a class="btn btn--ghost" href="https://open.spotify.com/artist/<?php echo esc_attr( $spotify ); ?>" target="_blank" rel="noopener">Ouvrir dans Spotify</a>
+		</div>
+	</div>
+</section>
+
 <section id="lookbook" class="lookbook wrap">
 	<header class="section-head">
 		<p class="eyebrow">Lookbook</p>

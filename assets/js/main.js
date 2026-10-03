@@ -21,6 +21,30 @@
 		} );
 	}
 
+	// Section Spotify : la pochette s'incline vers le pointeur, le reflet le suit.
+	var deck = document.querySelector( '.listen__deck' );
+	if ( deck && window.matchMedia( '(hover: hover) and (prefers-reduced-motion: no-preference)' ).matches ) {
+		var tilt = 0;
+		deck.addEventListener( 'pointermove', function ( e ) {
+			var r = deck.getBoundingClientRect();
+			var x = ( e.clientX - r.left ) / r.width;
+			var y = ( e.clientY - r.top ) / r.height;
+			cancelAnimationFrame( tilt );
+			tilt = requestAnimationFrame( function () {
+				deck.style.setProperty( '--rx', ( ( 0.5 - y ) * 24 ).toFixed( 2 ) + 'deg' );
+				deck.style.setProperty( '--ry', ( ( x - 0.5 ) * 30 ).toFixed( 2 ) + 'deg' );
+				deck.style.setProperty( '--mx', ( x * 100 ).toFixed( 1 ) + '%' );
+				deck.style.setProperty( '--my', ( y * 100 ).toFixed( 1 ) + '%' );
+			} );
+		} );
+		deck.addEventListener( 'pointerleave', function () {
+			cancelAnimationFrame( tilt );
+			[ '--rx', '--ry', '--mx', '--my' ].forEach( function ( p ) {
+				deck.style.removeProperty( p );
+			} );
+		} );
+	}
+
 	// Fiche produit : boutons de taille à la place du <select>, avec l'état du stock.
 	var LOW = 5;
 	document.querySelectorAll( '.variations_form select' ).forEach( function ( select ) {
