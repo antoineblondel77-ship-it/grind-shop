@@ -434,8 +434,13 @@ async function loadModel( url, printUrl, opts, renderer ) {
 	const H = SH, k = opts.printScale || 1;
 	const px = ( opts.printX ?? -0.01 ) * H;
 	const py = ( 0.5 - ( opts.printY ?? 0.3 ) ) * H;
-	const hit = new THREE.Raycaster( new THREE.Vector3( px, py, 20 ), new THREE.Vector3( 0, 0, -1 ) ).intersectObjects( meshes, false )[ 0 ];
+	const hits = new THREE.Raycaster( new THREE.Vector3( px, py, 20 ), new THREE.Vector3( 0, 0, -1 ) ).intersectObjects( meshes, false );
+	const hit = hits[ 0 ];
 	if ( hit ) {
+		// Profondeur de projection : jusqu'à mi-chemin du dos, pour suivre le tissu
+		// qui fuit vers l'arrière en haut de la poitrine sans toucher le dos.
+		const back = hits.find( ( q ) => q.point.z < hit.point.z - 0.05 );
+		const depth = back ? hit.point.z - back.point.z : 0.6;
 		printTex.colorSpace = THREE.SRGBColorSpace;
 		printTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 		const w = 0.25 * H * k, h = w * ( printTex.image.height / printTex.image.width );
@@ -445,7 +450,7 @@ async function loadModel( url, printUrl, opts, renderer ) {
 		} );
 		// Le modèle peut être découpé en plusieurs maillages : on projette sur chacun.
 		for ( const m of meshes ) {
-			const g = new DecalGeometry( m, hit.point, new THREE.Euler( 0, 0, 0 ), new THREE.Vector3( w, h, 0.3 ) );
+			const g = new DecalGeometry( m, hit.point, new THREE.Euler( 0, 0, 0 ), new THREE.Vector3( w, h, depth ) );
 			if ( g.attributes.position.count ) holder.add( new THREE.Mesh( g, decalMat ) );
 		}
 	}
