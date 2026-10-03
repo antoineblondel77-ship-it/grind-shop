@@ -5,7 +5,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GRIND_VERSION', '0.2.0' );
+define( 'GRIND_VERSION', '0.3.2' );
+
+require_once __DIR__ . '/inc/drop.php';
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -36,10 +38,35 @@ add_action( 'wp_enqueue_scripts', function () {
 	);
 	wp_enqueue_style( 'grind-main', $uri . '/assets/css/main.css', array(), GRIND_VERSION );
 	wp_enqueue_script( 'grind-main', $uri . '/assets/js/main.js', array(), GRIND_VERSION, true );
+	wp_localize_script( 'grind-main', 'GRIND', array( 'waitlist' => esc_url_raw( rest_url( 'grind/v1/waitlist' ) ) ) );
+
+	wp_register_script_module( 'grind-tee-core', $uri . '/assets/js/tee-core.js', array(), GRIND_VERSION );
 	if ( is_front_page() ) {
-		wp_enqueue_script_module( 'grind-tee3d', $uri . '/assets/js/tee3d.js', array(), GRIND_VERSION );
+		wp_enqueue_script_module( 'grind-tee3d', $uri . '/assets/js/tee3d.js', array( 'grind-tee-core' ), GRIND_VERSION );
+		wp_enqueue_script_module( 'grind-player', $uri . '/assets/js/player.js', array(), GRIND_VERSION );
+	}
+	if ( function_exists( 'is_product' ) && is_product() ) {
+		wp_enqueue_script_module( 'grind-viewer', $uri . '/assets/js/tee-viewer.js', array( 'grind-tee-core' ), GRIND_VERSION );
 	}
 } );
+
+/** Data-attributes du tee 3D : print, et modèle .glb s'il existe (réglages dans tee.json). */
+function grind_tee_attrs() {
+	$dir   = get_template_directory() . '/assets/models/';
+	$attrs = sprintf(
+		' data-print="%s" data-print-alpha="%s"',
+		grind_asset( 'img/print.png' ),
+		grind_asset( 'img/print-alpha.png' )
+	);
+	if ( file_exists( $dir . 'tee.glb' ) ) {
+		$attrs .= sprintf(
+			' data-model="%s" data-model-options="%s"',
+			grind_asset( 'models/tee.glb?v=' . filemtime( $dir . 'tee.glb' ) ),
+			esc_attr( file_exists( $dir . 'tee.json' ) ? file_get_contents( $dir . 'tee.json' ) : '{}' )
+		);
+	}
+	return $attrs;
+}
 
 /** URL d'un asset du thème. */
 function grind_asset( $path ) {
@@ -105,6 +132,31 @@ add_filter( 'woocommerce_product_tabs', function ( $tabs ) {
 
 // Pas de produits apparentés (un seul article pour l'instant).
 remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
+
+// Fiche produit : configurateur 3D + photos (onglets).
+remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
+add_action( 'woocommerce_before_single_product_summary', function () {
+	?>
+	<div class="product-media" data-view="3d">
+		<div class="media-tabs" role="tablist" aria-label="Affichage">
+			<button type="button" role="tab" aria-selected="true" data-view="3d">3D</button>
+			<button type="button" role="tab" aria-selected="false" data-view="photos">Photos</button>
+		</div>
+		<div class="tee-viewer"<?php echo grind_tee_attrs(); // phpcs:ignore -- échappé dans la fonction ?>>
+			<img class="tee-viewer__fallback" src="<?php echo grind_asset( 'img/tee-front.jpg' ); ?>" alt="">
+			<canvas aria-label="T-shirt en 3D : glisser pour tourner, pincer ou molette pour zoomer"></canvas>
+			<p class="tee-viewer__hint">Glisse pour tourner</p>
+			<p class="tee-viewer__size" aria-live="polite"></p>
+			<div class="tee-viewer__views">
+				<button type="button" data-cam="front">Face</button>
+				<button type="button" data-cam="back">Dos</button>
+				<button type="button" data-cam="print">Zoom print</button>
+			</div>
+		</div>
+		<?php woocommerce_show_product_images(); ?>
+	</div>
+	<?php
+}, 20 );
 
 // Petit badge "Drop 001" au-dessus du titre produit.
 add_action( 'woocommerce_single_product_summary', function () {

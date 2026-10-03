@@ -119,11 +119,14 @@ foreach ( $sizes as $s ) {
 	$v->set_regular_price( '35' );
 	$v->set_sku( 'GRIND-TEE-001-' . $s );
 	$v->set_manage_stock( true );
-	$v->set_stock_quantity( 25 );
+	$v->set_stock_quantity( array( 'S' => 12, 'M' => 3, 'L' => 18, 'XL' => 5, 'XXL' => 0 )[ $s ] );
 	$v->save();
 }
 WC_Product_Variable::sync( $id );
 wc_delete_product_transients( $id );
+
+// Drop : ouverture 3 jours après le lancement de la démo, à 20h (compte à rebours visible).
+set_theme_mod( 'grind_drop_date', wp_date( 'Y-m-d', time() + 3 * DAY_IN_SECONDS ) . 'T20:00' );
 
 // Permaliens : les règles seront régénérées à la prochaine requête (avec la base /produit).
 update_option( 'permalink_structure', '/%postname%/' );

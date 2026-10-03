@@ -15,7 +15,7 @@
 <div class="announce" aria-label="Annonces">
 	<div class="announce__track">
 		<?php for ( $i = 0; $i < 2; $i++ ) : ?>
-			<span>Drop 001 disponible</span><span>✦</span>
+			<span><?php echo grind_drop_locked() ? 'Drop 001 — Ouverture ' . esc_html( grind_drop_label() ) : 'Drop 001 disponible'; ?></span><span>✦</span>
 			<span>Livraison offerte dès 60 €</span><span>✦</span>
 			<span>Parental Advisory — Explicit Content</span><span>✦</span>
 			<span>Édition limitée</span><span>✦</span>

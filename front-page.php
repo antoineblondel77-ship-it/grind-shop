@@ -8,6 +8,7 @@ get_header();
 $product = grind_featured_product();
 $shop    = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
 $link    = $product ? $product->get_permalink() : $shop;
+$locked  = grind_drop_locked();
 ?>
 
 <section class="hero" aria-label="Drop 001">
@@ -18,12 +19,21 @@ $link    = $product ? $product->get_permalink() : $shop;
 	<div class="grain"></div>
 
 	<div class="hero__content">
-		<p class="eyebrow">Drop 001 — Le t-shirt du clip</p>
+		<p class="eyebrow"><?php echo $locked ? 'Drop 001 — Ouverture ' . esc_html( grind_drop_label() ) : 'Drop 001 — Le t-shirt du clip'; ?></p>
 		<h1 class="hero__title">GRIND</h1>
-		<div class="hero__ctas">
-			<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>">Shop le drop</a>
-			<a class="btn btn--ghost" href="#lookbook">Lookbook</a>
-		</div>
+		<?php if ( $locked ) : ?>
+			<?php grind_countdown( 'countdown--hero' ); ?>
+			<?php grind_waitlist_form( 'Me prévenir', 'accueil' ); ?>
+		<?php else : ?>
+			<div class="hero__ctas">
+				<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>">Shop le drop</a>
+				<a class="btn btn--ghost" href="#lookbook">Lookbook</a>
+			</div>
+		<?php endif; ?>
+		<button type="button" class="play-clip" data-player-open aria-haspopup="dialog">
+			<span class="play-clip__icon" aria-hidden="true"></span>
+			<span>Voir le clip</span>
+		</button>
 	</div>
 
 	<div class="hero__corner hero__corner--l">Toulouse — 31</div>
@@ -38,20 +48,7 @@ $link    = $product ? $product->get_permalink() : $shop;
 	</div>
 </div>
 
-<?php
-// Modèle 3D réaliste optionnel : assets/models/tee.glb (+ réglages dans tee.json).
-$model_dir  = get_template_directory() . '/assets/models/';
-$model_attr = '';
-if ( file_exists( $model_dir . 'tee.glb' ) ) {
-	$model_opts = file_exists( $model_dir . 'tee.json' ) ? file_get_contents( $model_dir . 'tee.json' ) : '{}';
-	$model_attr = sprintf(
-		' data-model="%s" data-model-options="%s"',
-		grind_asset( 'models/tee.glb?v=' . filemtime( $model_dir . 'tee.glb' ) ),
-		esc_attr( $model_opts )
-	);
-}
-?>
-<section class="tee3d" aria-label="Le t-shirt en 3D" data-print="<?php echo grind_asset( 'img/print.png' ); ?>" data-print-alpha="<?php echo grind_asset( 'img/print-alpha.png' ); ?>"<?php echo $model_attr; // phpcs:ignore -- échappé ci-dessus ?>>
+<section class="tee3d" aria-label="Le t-shirt en 3D"<?php echo grind_tee_attrs(); // phpcs:ignore -- échappé dans la fonction ?>>
 	<div class="tee3d__sticky">
 		<div class="tee3d__bgtext" aria-hidden="true"><span>Parental Advisory — Explicit Content — Parental Advisory</span></div>
 		<img class="tee3d__fallback" src="<?php echo grind_asset( 'img/tee-front.jpg' ); ?>" alt="T-shirt Parental Advisory, face avant">
@@ -77,7 +74,7 @@ if ( file_exists( $model_dir . 'tee.glb' ) ) {
 			<?php if ( $product ) : ?>
 				<p class="tee3d__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></p>
 			<?php endif; ?>
-			<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>">Choisir ma taille</a>
+			<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>"><?php echo $locked ? 'Me prévenir' : 'Choisir ma taille'; ?></a>
 		</div>
 
 		<div class="tee3d__progress" aria-hidden="true"><span></span></div>
@@ -88,13 +85,8 @@ if ( file_exists( $model_dir . 'tee.glb' ) ) {
 <?php if ( $product ) :
 	$gallery = $product->get_gallery_image_ids();
 	$hover   = $gallery ? wp_get_attachment_image_url( $gallery[0], 'large' ) : '';
-	$sizes   = array();
-	if ( $product->is_type( 'variable' ) ) {
-		$attrs = $product->get_variation_attributes();
-		$sizes = $attrs['pa_taille'] ?? array();
-		$terms = get_terms( array( 'taxonomy' => 'pa_taille', 'hide_empty' => false, 'orderby' => 'menu_order' ) );
-		$sizes = array_values( array_filter( wp_list_pluck( $terms, 'slug' ), fn( $s ) => in_array( $s, $sizes, true ) ) );
-	}
+	$sizes   = grind_size_stock( $product );
+	$total   = grind_total_stock( $product );
 	?>
 <section id="drop" class="drop wrap">
 	<a class="drop__media" href="<?php echo esc_url( $link ); ?>">
@@ -114,21 +106,32 @@ if ( file_exists( $model_dir . 'tee.glb' ) ) {
 		<?php if ( $sizes ) : ?>
 			<p class="label">Taille</p>
 			<div class="size-row">
-				<?php foreach ( $sizes as $slug ) :
-					$term = get_term_by( 'slug', $slug, 'pa_taille' );
+				<?php foreach ( $sizes as $slug => $s ) :
+					$note = grind_stock_note( $s );
+					$cls  = $s['in_stock'] ? ( $note ? ' is-low' : '' ) : ' is-out';
 					?>
-					<a class="size-chip" href="<?php echo esc_url( add_query_arg( 'attribute_pa_taille', $slug, $link ) ); ?>"><?php echo esc_html( $term ? $term->name : strtoupper( $slug ) ); ?></a>
+					<?php if ( $s['in_stock'] ) : ?>
+						<a class="size-chip<?php echo esc_attr( $cls ); ?>" href="<?php echo esc_url( add_query_arg( 'attribute_pa_taille', $slug, $link ) ); ?>"><?php echo esc_html( $s['name'] ); ?><?php if ( $note ) : ?><em><?php echo esc_html( $note ); ?></em><?php endif; ?></a>
+					<?php else : ?>
+						<span class="size-chip is-out"><?php echo esc_html( $s['name'] ); ?><em>Sold out</em></span>
+					<?php endif; ?>
 				<?php endforeach; ?>
 			</div>
 		<?php endif; ?>
 
-		<a class="btn btn--red btn--block" href="<?php echo esc_url( $link ); ?>">Commander</a>
+		<?php if ( $locked ) : ?>
+			<p class="label">Ouverture <?php echo esc_html( grind_drop_label() ); ?></p>
+			<?php grind_countdown( 'countdown--inline' ); ?>
+			<a class="btn btn--red btn--block" href="<?php echo esc_url( $link ); ?>">Me prévenir à l'ouverture</a>
+		<?php else : ?>
+			<a class="btn btn--red btn--block" href="<?php echo esc_url( $link ); ?>">Commander</a>
+		<?php endif; ?>
 
 		<dl class="specs">
 			<div><dt>Coupe</dt><dd>Oversize</dd></div>
 			<div><dt>Matière</dt><dd>100 % coton</dd></div>
 			<div><dt>Impression</dt><dd>Face avant</dd></div>
-			<div><dt>Stock</dt><dd>Limité</dd></div>
+			<div><dt>Stock</dt><dd><?php echo null === $total ? 'Limité' : esc_html( sprintf( '%d pièces', $total ) ); ?></dd></div>
 		</dl>
 	</div>
 </section>

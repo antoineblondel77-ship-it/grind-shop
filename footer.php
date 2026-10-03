@@ -5,12 +5,7 @@
 		<div class="footer-news">
 			<p class="eyebrow">Prochain drop</p>
 			<h2 class="display display--md">Sois là avant<br>tout le monde.</h2>
-			<form class="news-form" action="#" method="post" onsubmit="event.preventDefault(); this.classList.add('is-sent');">
-				<label class="sr-only" for="news-email">Adresse e-mail</label>
-				<input id="news-email" type="email" placeholder="ton@email.fr" required>
-				<button type="submit" class="btn btn--red">S'inscrire</button>
-				<p class="news-form__ok">C'est noté. On te prévient en premier.</p>
-			</form>
+			<?php grind_waitlist_form( "S'inscrire", 'footer' ); ?>
 		</div>
 
 		<div class="footer-grid">
@@ -54,6 +49,8 @@
 		</div>
 	</div>
 </footer>
+
+<?php if ( is_front_page() ) get_template_part( 'parts/player' ); ?>
 
 <?php wp_footer(); ?>
 </body>
