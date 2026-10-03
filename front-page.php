@@ -148,7 +148,12 @@ $total = $product ? grind_total_stock( $product ) : null;
 			<h2 id="listen-title" class="listen__title">GUTS <em>sur Spotify</em></h2>
 			<p class="listen__text">Le son derrière le drop. Abonne-toi pour ne rater aucune sortie.</p>
 			<iframe class="listen__embed" src="https://open.spotify.com/embed/artist/<?php echo esc_attr( $spotify ); ?>?utm_source=generator&amp;theme=0" title="GUTS sur Spotify" height="352" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
-			<a class="btn btn--ghost" href="https://open.spotify.com/artist/<?php echo esc_attr( $spotify ); ?>" target="_blank" rel="noopener">Ouvrir dans Spotify</a>
+			<div class="listen__links">
+				<a class="btn btn--ghost" href="https://open.spotify.com/artist/<?php echo esc_attr( $spotify ); ?>" target="_blank" rel="noopener">Spotify</a>
+				<?php // TODO : remplacer « # » par les liens de l'artiste. ?>
+				<a class="btn btn--ghost" href="#" target="_blank" rel="noopener">Apple Music</a>
+				<a class="btn btn--ghost" href="#" target="_blank" rel="noopener">Deezer</a>
+			</div>
 		</div>
 	</div>
 </section>
