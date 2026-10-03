@@ -48,7 +48,12 @@ $locked  = grind_drop_locked();
 	</div>
 </div>
 
+<?php
+$sizes = $product ? grind_size_stock( $product ) : array();
+$total = $product ? grind_total_stock( $product ) : null;
+?>
 <section class="tee3d" aria-label="Le t-shirt en 3D"<?php echo grind_tee_attrs(); // phpcs:ignore -- échappé dans la fonction ?>>
+	<span id="drop" class="tee3d__anchor" aria-hidden="true"></span>
 	<div class="tee3d__sticky">
 		<div class="tee3d__bgtext" aria-hidden="true"><span>Parental Advisory — Explicit Content — Parental Advisory</span></div>
 		<img class="tee3d__fallback" src="<?php echo grind_asset( 'img/tee-front.jpg' ); ?>" alt="T-shirt Parental Advisory, face avant">
@@ -70,72 +75,50 @@ $locked  = grind_drop_locked();
 			<h3>Édition<br>limitée.</h3>
 			<p>Tiré en série limitée pour la sortie du clip.</p>
 		</div>
-		<div class="tee3d__step tee3d__step--cta" data-from="0.88" data-to="1.2">
-			<?php if ( $product ) : ?>
-				<p class="tee3d__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></p>
-			<?php endif; ?>
-			<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>"><?php echo $locked ? 'Me prévenir' : 'Choisir ma taille'; ?></a>
-		</div>
+		<?php if ( $product ) : ?>
+			<div class="tee3d__step tee3d__panel" data-from="0.84" data-to="2">
+				<p class="eyebrow">Drop 001 / 001</p>
+				<h2 class="tee3d__panel-title"><?php echo esc_html( $product->get_name() ); ?></h2>
+				<p class="drop__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></p>
+				<div class="drop__desc"><?php echo wp_kses_post( wpautop( $product->get_short_description() ) ); ?></div>
+
+				<?php if ( $sizes ) : ?>
+					<p class="label">Taille</p>
+					<div class="size-row">
+						<?php foreach ( $sizes as $slug => $s ) :
+							$note = grind_stock_note( $s );
+							$cls  = $s['in_stock'] ? ( $note ? ' is-low' : '' ) : ' is-out';
+							?>
+							<?php if ( $s['in_stock'] ) : ?>
+								<a class="size-chip<?php echo esc_attr( $cls ); ?>" href="<?php echo esc_url( add_query_arg( 'attribute_pa_taille', $slug, $link ) ); ?>"><?php echo esc_html( $s['name'] ); ?><?php if ( $note ) : ?><em><?php echo esc_html( $note ); ?></em><?php endif; ?></a>
+							<?php else : ?>
+								<span class="size-chip is-out"><?php echo esc_html( $s['name'] ); ?><em>Sold out</em></span>
+							<?php endif; ?>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( $locked ) : ?>
+					<p class="label">Ouverture <?php echo esc_html( grind_drop_label() ); ?></p>
+					<?php grind_countdown( 'countdown--inline' ); ?>
+					<a class="btn btn--red btn--block" href="<?php echo esc_url( $link ); ?>">Me prévenir à l'ouverture</a>
+				<?php else : ?>
+					<a class="btn btn--red btn--block" href="<?php echo esc_url( $link ); ?>">Commander</a>
+				<?php endif; ?>
+
+				<dl class="specs">
+					<div><dt>Coupe</dt><dd>Oversize</dd></div>
+					<div><dt>Matière</dt><dd>100 % coton</dd></div>
+					<div><dt>Impression</dt><dd>Face avant</dd></div>
+					<div><dt>Stock</dt><dd><?php echo null === $total ? 'Limité' : esc_html( sprintf( '%d pièces', $total ) ); ?></dd></div>
+				</dl>
+			</div>
+		<?php endif; ?>
 
 		<div class="tee3d__progress" aria-hidden="true"><span></span></div>
 		<p class="tee3d__hint" aria-hidden="true">Scroll</p>
 	</div>
 </section>
-
-<?php if ( $product ) :
-	$gallery = $product->get_gallery_image_ids();
-	$hover   = $gallery ? wp_get_attachment_image_url( $gallery[0], 'large' ) : '';
-	$sizes   = grind_size_stock( $product );
-	$total   = grind_total_stock( $product );
-	?>
-<section id="drop" class="drop wrap">
-	<a class="drop__media" href="<?php echo esc_url( $link ); ?>">
-		<?php echo $product->get_image( 'large', array( 'class' => 'drop__img' ) ); ?>
-		<?php if ( $hover ) : ?>
-			<img class="drop__img drop__img--hover" src="<?php echo esc_url( $hover ); ?>" alt="" loading="lazy">
-		<?php endif; ?>
-		<span class="tag">Nouveau</span>
-	</a>
-
-	<div class="drop__info">
-		<p class="eyebrow">Drop 001 / 001</p>
-		<h2 class="display display--lg"><?php echo esc_html( $product->get_name() ); ?></h2>
-		<p class="drop__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></p>
-		<div class="drop__desc"><?php echo wp_kses_post( wpautop( $product->get_short_description() ) ); ?></div>
-
-		<?php if ( $sizes ) : ?>
-			<p class="label">Taille</p>
-			<div class="size-row">
-				<?php foreach ( $sizes as $slug => $s ) :
-					$note = grind_stock_note( $s );
-					$cls  = $s['in_stock'] ? ( $note ? ' is-low' : '' ) : ' is-out';
-					?>
-					<?php if ( $s['in_stock'] ) : ?>
-						<a class="size-chip<?php echo esc_attr( $cls ); ?>" href="<?php echo esc_url( add_query_arg( 'attribute_pa_taille', $slug, $link ) ); ?>"><?php echo esc_html( $s['name'] ); ?><?php if ( $note ) : ?><em><?php echo esc_html( $note ); ?></em><?php endif; ?></a>
-					<?php else : ?>
-						<span class="size-chip is-out"><?php echo esc_html( $s['name'] ); ?><em>Sold out</em></span>
-					<?php endif; ?>
-				<?php endforeach; ?>
-			</div>
-		<?php endif; ?>
-
-		<?php if ( $locked ) : ?>
-			<p class="label">Ouverture <?php echo esc_html( grind_drop_label() ); ?></p>
-			<?php grind_countdown( 'countdown--inline' ); ?>
-			<a class="btn btn--red btn--block" href="<?php echo esc_url( $link ); ?>">Me prévenir à l'ouverture</a>
-		<?php else : ?>
-			<a class="btn btn--red btn--block" href="<?php echo esc_url( $link ); ?>">Commander</a>
-		<?php endif; ?>
-
-		<dl class="specs">
-			<div><dt>Coupe</dt><dd>Oversize</dd></div>
-			<div><dt>Matière</dt><dd>100 % coton</dd></div>
-			<div><dt>Impression</dt><dd>Face avant</dd></div>
-			<div><dt>Stock</dt><dd><?php echo null === $total ? 'Limité' : esc_html( sprintf( '%d pièces', $total ) ); ?></dd></div>
-		</dl>
-	</div>
-</section>
-<?php endif; ?>
 
 <section class="manifesto">
 	<div class="grain"></div>

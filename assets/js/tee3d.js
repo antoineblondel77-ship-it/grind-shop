@@ -8,6 +8,7 @@ function init( section ) {
 	const steps = [ ...section.querySelectorAll( '.tee3d__step' ) ];
 	const bar = section.querySelector( '.tee3d__progress span' );
 	const bgText = section.querySelector( '.tee3d__bgtext span' );
+	const hint = section.querySelector( '.tee3d__hint' );
 	const reduced = window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
 
 	let stage;
@@ -44,8 +45,9 @@ function init( section ) {
 		{ p: 0.44, ry: Math.PI * 0.55, rx: 0.1, rz: -0.06, x: 0.0, y: -0.05, s: 1.0 },
 		{ p: 0.58, ry: Math.PI, rx: 0.02, rz: 0.05, x: -0.5, y: 0.0, s: 1.05 },
 		{ p: 0.75, ry: Math.PI * 1.72, rx: -0.12, rz: -0.2, x: -0.45, y: 0.05, s: 1.15 },
-		{ p: 0.90, ry: TAU, rx: 0.0, rz: 0.0, x: 0.0, y: 0.12, s: 0.9 },
-		{ p: 1.00, ry: TAU + 0.12, rx: 0.0, rz: 0.0, x: 0.0, y: 0.14, s: 0.88 },
+		// Fin : le tee se pose à gauche, tourné vers la fiche du drop qui apparaît à droite.
+		{ p: 0.86, ry: TAU + 0.28, rx: 0.0, rz: 0.0, x: -0.55, y: 0.02, s: 0.98 },
+		{ p: 1.00, ry: TAU + 0.14, rx: 0.02, rz: 0.0, x: -0.55, y: 0.02, s: 0.98 },
 	];
 	const ease = ( t ) => t * t * ( 3 - 2 * t );
 	function pose( p ) {
@@ -103,15 +105,17 @@ function init( section ) {
 
 		const k = pose( smooth );
 		const idle = reduced ? 0 : 1;
+		// Sur mobile, la fiche occupe le bas de l'écran : le tee remonte et rétrécit.
+		const panel = portrait ? THREE.MathUtils.smoothstep( smooth, 0.8, 0.88 ) : 0;
 		const xOff = portrait ? 0 : k.x * visW * 0.32;
-		const yOff = ( portrait ? 0.42 : k.y ) * fit;
+		const yOff = portrait ? 0.42 * fit + panel * visH * 0.24 : k.y * fit;
 		tee.position.set( xOff, yOff + Math.sin( t * 1.1 ) * 0.03 * idle, 0 );
 		tee.rotation.set(
 			k.rx + mouse.sy * 0.12 + Math.sin( t * 0.7 ) * 0.02 * idle,
 			k.ry + mouse.sx * 0.25 + Math.sin( t * 0.45 ) * 0.04 * idle,
 			k.rz
 		);
-		tee.scale.setScalar( ( portrait ? Math.min( k.s, 1.25 ) : k.s ) * fit );
+		tee.scale.setScalar( ( portrait ? Math.min( k.s, 1.25 ) * ( 1 - 0.45 * panel ) : k.s ) * fit );
 
 		halo.position.set( xOff * 0.8, yOff * 0.5, -2.5 );
 		halo.scale.setScalar( fit * ( 1 + Math.sin( t * 0.8 ) * 0.03 * idle ) );
@@ -127,6 +131,7 @@ function init( section ) {
 	function updateUI( p ) {
 		if ( bar ) bar.style.transform = `scaleX(${ p })`;
 		if ( bgText ) bgText.style.transform = `translate3d(${ -p * 55 }%, 0, 0)`;
+		if ( hint ) hint.style.opacity = 1 - THREE.MathUtils.clamp( p / 0.04, 0, 1 );
 		for ( const el of steps ) {
 			const from = +el.dataset.from, to = +el.dataset.to, f = 0.05;
 			const o = Math.min( THREE.MathUtils.clamp( ( p - from ) / f, 0, 1 ), THREE.MathUtils.clamp( ( to - p ) / f, 0, 1 ) );

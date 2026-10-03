@@ -206,28 +206,11 @@ a:hover { color: var(--red-hot); }
 .rec { width: 8px; height: 8px; border-radius: 50%; background: var(--red-hot); animation: blink 1.2s infinite; }
 @keyframes blink { 50% { opacity: .2; } }
 
-/* ---------- Drop (produit vedette) ---------- */
-.drop {
-	display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(28px, 5vw, 88px);
-	padding-block: clamp(64px, 10vw, 140px);
-	align-items: center;
-}
-.drop__media { position: relative; display: block; aspect-ratio: 1; overflow: hidden; background: var(--bg-2); }
-.drop__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .6s var(--ease), transform 1.2s var(--ease); }
-.drop__img--hover { opacity: 0; }
-.drop__media:hover .drop__img { transform: scale(1.03); }
-.drop__media:hover .drop__img--hover { opacity: 1; }
-.tag {
-	position: absolute; top: 18px; left: 18px;
-	background: var(--red); color: #fff;
-	font-stretch: 75%; font-weight: 700; font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
-	padding: 6px 10px;
-}
+/* ---------- Fiche du drop (fin de la séquence 3D) ---------- */
 .drop__price { font-stretch: 80%; font-size: 22px; font-weight: 600; margin: 18px 0 8px; }
 .drop__price del { color: var(--muted); font-weight: 400; margin-right: 8px; }
 .drop__price ins { text-decoration: none; }
 .drop__desc { color: #cfc9c3; max-width: 46ch; }
-.drop .label { margin-top: 28px; }
 .size-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 .size-chip, .size-btn {
 	min-width: 56px; height: 48px; padding: 0 14px;
@@ -403,7 +386,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
 
 /* ---------- Responsive ---------- */
 @media (max-width: 960px) {
-	.drop, .woocommerce div.product { grid-template-columns: 1fr; }
+	.woocommerce div.product { grid-template-columns: 1fr; }
 	.woocommerce div.product div.summary { position: static; }
 	.footer-news { grid-template-columns: 1fr; }
 	.footer-grid { grid-template-columns: 1fr 1fr; }
@@ -455,7 +438,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
 .woocommerce div.product .woocommerce-tabs ul.tabs li.active { background: none; border: 0; }
 
 /* ---------- T-shirt 3D (scroll) ---------- */
-.tee3d { position: relative; height: 520vh; background: var(--bg); }
+.tee3d { position: relative; height: 560vh; background: var(--bg); }
 .tee3d__sticky {
 	position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; isolation: isolate;
 	background: radial-gradient(ellipse 70% 60% at 50% 55%, #1f0b0c 0%, var(--bg) 70%);
@@ -486,9 +469,6 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
 }
 .tee3d__step p:not(.eyebrow) { color: #cfc9c3; margin: 0; }
 .tee3d__step .eyebrow { color: var(--red-hot); }
-.tee3d__step--cta { top: auto; bottom: 9vh; left: 50%; width: auto; margin: 0; text-align: center; display: flex; gap: 18px; align-items: center; }
-.tee3d__step--cta.tee3d__step { translate: -50% 0; left: 50%; }
-.tee3d__price { font-stretch: 80%; font-size: 26px; font-weight: 700; margin: 0; }
 .tee3d__progress { position: absolute; z-index: 3; left: var(--gutter); right: var(--gutter); bottom: 28px; height: 1px; background: var(--line); }
 .tee3d__progress span { display: block; height: 100%; background: var(--red); transform: scaleX(0); transform-origin: left; }
 .tee3d__hint {
@@ -497,13 +477,12 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
 }
 
 @media (max-width: 760px) {
-	.tee3d { height: 480vh; }
+	.tee3d { height: 520vh; }
 	.tee3d__step, .tee3d__step--left, .tee3d__step--right {
 		top: auto; bottom: 64px; left: var(--gutter); right: var(--gutter); width: auto; margin: 0; text-align: left;
 	}
 	.tee3d__step h3 { font-size: 40px; margin-bottom: 10px; }
 	.tee3d__step p:not(.eyebrow) { font-size: 14px; }
-	.tee3d__step--cta.tee3d__step { left: var(--gutter); translate: none; justify-content: space-between; }
 }
 @media (max-width: 760px) {
 	.tee3d__sticky::after {
@@ -702,3 +681,35 @@ html.player-on .site-content, html.player-on .site-header, html.player-on .annou
 }
 
 .woocommerce div.product .woocommerce-variation-availability { display: none; }
+
+/* Fiche du drop intégrée à la scène 3D : le tee finit à gauche, la fiche s'installe à droite. */
+.tee3d__anchor { position: absolute; left: 0; bottom: 0; height: 100vh; width: 1px; pointer-events: none; }
+.tee3d .tee3d__panel {
+	top: 50%; right: var(--gutter); width: min(520px, 40vw); margin: 0;
+	translate: 0 -46%; max-height: calc(100vh - var(--header-h) - 48px); overflow: auto; scrollbar-width: none;
+}
+.tee3d__panel .eyebrow { color: var(--muted); }
+.tee3d__panel-title {
+	font-family: var(--display); font-stretch: 62.5%; font-weight: 500; text-transform: uppercase;
+	font-size: clamp(40px, min(4.4vw, 7.5vh), 76px); line-height: .92; margin: 0;
+}
+.tee3d__panel .drop__price { margin: 14px 0 6px; }
+.tee3d__panel .drop__desc p { margin: 0 0 4px; }
+.tee3d__panel .label { margin: 22px 0 10px; }
+.tee3d__panel .size-row { margin-bottom: 26px; }
+.tee3d__panel .countdown { margin-bottom: 18px; }
+.tee3d__panel .countdown__unit span { font-size: clamp(40px, min(4.6vw, 8vh), 72px); }
+.tee3d__panel .specs { margin-top: 24px; }
+.tee3d__panel .specs div { padding: 12px 0 0; }
+
+@media (max-width: 760px) {
+	.tee3d .tee3d__panel {
+		top: auto; bottom: 44px; left: var(--gutter); right: var(--gutter); width: auto; translate: none;
+		max-height: 60vh; padding-top: 4px;
+	}
+	.tee3d__panel-title { font-size: 34px; }
+	.tee3d__panel .drop__desc, .tee3d__panel .specs { display: none; }
+	.tee3d__panel .label { margin: 12px 0 8px; }
+	.tee3d__panel .size-row { margin-bottom: 24px; }
+	.tee3d__panel .countdown__unit span { font-size: 40px; }
+}
