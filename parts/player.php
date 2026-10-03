@@ -17,7 +17,7 @@ $link    = $product ? $product->get_permalink() : '';
 
 	<div class="player__stage">
 		<video class="player__video" preload="none" playsinline poster="<?php echo grind_asset( 'img/clip-poster.jpg' ); ?>">
-			<source src="<?php echo grind_asset( 'video/clip.mp4' ); ?>" type="video/mp4">
+			<source src="<?php echo grind_video( 'clip.mp4' ); ?>" type="video/mp4">
 		</video>
 	</div>
 

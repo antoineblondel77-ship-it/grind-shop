@@ -13,7 +13,7 @@ $locked  = grind_drop_locked();
 
 <section class="hero" aria-label="Drop 001">
 	<video class="hero__video" autoplay muted loop playsinline preload="auto" poster="<?php echo grind_asset( 'img/hero-poster.jpg' ); ?>">
-		<source src="<?php echo grind_asset( 'video/hero.mp4' ); ?>" type="video/mp4">
+		<source src="<?php echo grind_video( 'hero.mp4' ); ?>" type="video/mp4">
 	</video>
 	<div class="hero__shade"></div>
 	<div class="grain"></div>

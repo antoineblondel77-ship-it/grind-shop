@@ -73,6 +73,17 @@ function grind_asset( $path ) {
 	return esc_url( get_template_directory_uri() . '/assets/' . ltrim( $path, '/' ) );
 }
 
+/**
+ * URL d'une vidéo : fichier local s'il est présent, sinon la copie servie par jsDelivr
+ * (branche « media » du dépôt, gardée hors de main pour alléger la démo Playground).
+ */
+function grind_video( $file ) {
+	if ( file_exists( get_template_directory() . '/assets/video/' . $file ) ) {
+		return grind_asset( 'video/' . $file );
+	}
+	return esc_url( 'https://cdn.jsdelivr.net/gh/antoineblondel77-ship-it/grind-shop@media/' . $file );
+}
+
 /** Liens par défaut si aucun menu n'est assigné. */
 function grind_menu_fallback() {
 	$shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
