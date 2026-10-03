@@ -5,7 +5,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GRIND_VERSION', '0.1.2' );
+define( 'GRIND_VERSION', '0.2.0' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -36,6 +36,9 @@ add_action( 'wp_enqueue_scripts', function () {
 	);
 	wp_enqueue_style( 'grind-main', $uri . '/assets/css/main.css', array(), GRIND_VERSION );
 	wp_enqueue_script( 'grind-main', $uri . '/assets/js/main.js', array(), GRIND_VERSION, true );
+	if ( is_front_page() ) {
+		wp_enqueue_script_module( 'grind-tee3d', $uri . '/assets/js/tee3d.js', array(), GRIND_VERSION );
+	}
 } );
 
 /** URL d'un asset du thème. */

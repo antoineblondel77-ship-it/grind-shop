@@ -458,3 +458,61 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--i
 }
 .woocommerce .woocommerce-ordering select { min-height: 44px; }
 .woocommerce div.product .woocommerce-tabs ul.tabs li.active { background: none; border: 0; }
+
+/* ---------- T-shirt 3D (scroll) ---------- */
+.tee3d { position: relative; height: 520vh; background: var(--bg); }
+.tee3d__sticky {
+	position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; isolation: isolate;
+	background: radial-gradient(ellipse 70% 60% at 50% 55%, #1f0b0c 0%, var(--bg) 70%);
+}
+.tee3d__canvas, .tee3d__fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tee3d__canvas { z-index: 1; }
+.tee3d__fallback { object-fit: contain; padding: 12vh 8vw; transition: opacity .8s var(--ease); }
+.tee3d.is-ready .tee3d__fallback { opacity: 0; }
+.tee3d .grain { z-index: 2; }
+.tee3d__bgtext {
+	position: absolute; inset: 0; z-index: 0; display: flex; align-items: center; white-space: nowrap; pointer-events: none;
+}
+.tee3d__bgtext span {
+	font-family: var(--display); font-stretch: 62.5%; font-weight: 500; text-transform: uppercase;
+	font-size: clamp(160px, 26vw, 420px); line-height: 1;
+	color: transparent; -webkit-text-stroke: 1px rgba(239, 235, 230, .09);
+	padding-left: 8vw; will-change: transform;
+}
+.tee3d__step {
+	position: absolute; z-index: 3; top: 50%; width: min(380px, 34vw);
+	margin-top: -110px; opacity: 0; will-change: opacity, transform;
+}
+.tee3d__step--left { left: var(--gutter); }
+.tee3d__step--right { right: var(--gutter); text-align: right; }
+.tee3d__step h3 {
+	font-family: var(--display); font-stretch: 62.5%; font-weight: 500; text-transform: uppercase;
+	font-size: clamp(42px, 4.6vw, 76px); line-height: .92; margin: 0 0 18px;
+}
+.tee3d__step p:not(.eyebrow) { color: #cfc9c3; margin: 0; }
+.tee3d__step .eyebrow { color: var(--red-hot); }
+.tee3d__step--cta { top: auto; bottom: 9vh; left: 50%; width: auto; margin: 0; text-align: center; display: flex; gap: 18px; align-items: center; }
+.tee3d__step--cta.tee3d__step { translate: -50% 0; left: 50%; }
+.tee3d__price { font-stretch: 80%; font-size: 26px; font-weight: 700; margin: 0; }
+.tee3d__progress { position: absolute; z-index: 3; left: var(--gutter); right: var(--gutter); bottom: 28px; height: 1px; background: var(--line); }
+.tee3d__progress span { display: block; height: 100%; background: var(--red); transform: scaleX(0); transform-origin: left; }
+.tee3d__hint {
+	position: absolute; z-index: 3; left: 50%; top: calc(var(--header-h) + 28px); transform: translateX(-50%); margin: 0;
+	font-stretch: 75%; font-weight: 600; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--muted);
+}
+
+@media (max-width: 760px) {
+	.tee3d { height: 480vh; }
+	.tee3d__step, .tee3d__step--left, .tee3d__step--right {
+		top: auto; bottom: 64px; left: var(--gutter); right: var(--gutter); width: auto; margin: 0; text-align: left;
+	}
+	.tee3d__step h3 { font-size: 40px; margin-bottom: 10px; }
+	.tee3d__step p:not(.eyebrow) { font-size: 14px; }
+	.tee3d__step--cta.tee3d__step { left: var(--gutter); translate: none; justify-content: space-between; }
+}
+@media (max-width: 760px) {
+	.tee3d__sticky::after {
+		content: ""; position: absolute; inset: auto 0 0 0; height: 46%; z-index: 2; pointer-events: none;
+		background: linear-gradient(to bottom, rgba(11,10,10,0), rgba(11,10,10,.92) 55%);
+	}
+}

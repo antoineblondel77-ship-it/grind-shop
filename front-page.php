@@ -38,6 +38,40 @@ $link    = $product ? $product->get_permalink() : $shop;
 	</div>
 </div>
 
+<section class="tee3d" aria-label="Le t-shirt en 3D" data-print="<?php echo grind_asset( 'img/print.png' ); ?>">
+	<div class="tee3d__sticky">
+		<div class="tee3d__bgtext" aria-hidden="true"><span>Parental Advisory — Explicit Content — Parental Advisory</span></div>
+		<img class="tee3d__fallback" src="<?php echo grind_asset( 'img/tee-front.jpg' ); ?>" alt="T-shirt Parental Advisory, face avant">
+		<canvas class="tee3d__canvas" aria-hidden="true"></canvas>
+		<div class="grain"></div>
+
+		<div class="tee3d__step tee3d__step--left" data-from="0.06" data-to="0.36">
+			<p class="eyebrow">01 — Le visuel</p>
+			<h3>Ciel en feu,<br>billets en l'air.</h3>
+			<p>Une cover sur le cœur, et l'étiquette <em>Parental Advisory</em> répétée jusqu'à saturation.</p>
+		</div>
+		<div class="tee3d__step tee3d__step--right" data-from="0.48" data-to="0.66">
+			<p class="eyebrow">02 — La coupe</p>
+			<h3>Oversize.<br>Épaules tombantes.</h3>
+			<p>Coupe large, tombé lourd. Il se porte comme dans le clip.</p>
+		</div>
+		<div class="tee3d__step tee3d__step--right" data-from="0.68" data-to="0.84">
+			<p class="eyebrow">03 — Drop 001</p>
+			<h3>Édition<br>limitée.</h3>
+			<p>Tiré en série limitée pour la sortie du clip.</p>
+		</div>
+		<div class="tee3d__step tee3d__step--cta" data-from="0.88" data-to="1.2">
+			<?php if ( $product ) : ?>
+				<p class="tee3d__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></p>
+			<?php endif; ?>
+			<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>">Choisir ma taille</a>
+		</div>
+
+		<div class="tee3d__progress" aria-hidden="true"><span></span></div>
+		<p class="tee3d__hint" aria-hidden="true">Scroll</p>
+	</div>
+</section>
+
 <?php if ( $product ) :
 	$gallery = $product->get_gallery_image_ids();
 	$hover   = $gallery ? wp_get_attachment_image_url( $gallery[0], 'large' ) : '';
