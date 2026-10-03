@@ -1,11 +1,12 @@
 /**
  * GRIND — t-shirt 3D piloté au scroll.
- * Le tee est généré à partir de sa silhouette (gonflée en volume), le print est appliqué en texture.
+ * Si un modèle .glb est fourni (assets/models/tee.glb), il est chargé et le print y est projeté.
+ * Sinon, le tee est généré à partir de sa silhouette (gonflée en volume), print en texture.
  */
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/+esm';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js/+esm';
+import { DecalGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/geometries/DecalGeometry.js/+esm';
 
-const section = document.querySelector( '.tee3d' );
-if ( section ) init( section );
 
 function init( section ) {
 	const canvas = section.querySelector( '.tee3d__canvas' );
@@ -51,13 +52,35 @@ function init( section ) {
 	const dust = buildDust();
 	scene.add( dust );
 
-	const printImg = new Image();
-	printImg.crossOrigin = 'anonymous';
-	printImg.onload = () => {
-		buildTee( tee, printImg, renderer );
+	let size = { w: 2.4, h: SH };
+	const ready = () => {
 		section.classList.add( 'is-ready' );
+		resize();
 	};
-	printImg.src = section.dataset.print;
+	const procedural = () => {
+		const printImg = new Image();
+		printImg.crossOrigin = 'anonymous';
+		printImg.onload = () => {
+			buildTee( tee, printImg, renderer );
+			ready();
+		};
+		printImg.src = section.dataset.print;
+	};
+	if ( section.dataset.model ) {
+		const opts = JSON.parse( section.dataset.modelOptions || '{}' );
+		loadModel( section.dataset.model, section.dataset.printAlpha, opts, renderer )
+			.then( ( holder ) => {
+				tee.add( holder );
+				size = holder.userData.size;
+				ready();
+			} )
+			.catch( ( err ) => {
+				console.warn( 'GRIND : modèle 3D indisponible, tee généré à la place.', err );
+				procedural();
+			} );
+	} else {
+		procedural();
+	}
 
 	// --- Chorégraphie : positions clés le long du scroll -------------------
 	const TAU = Math.PI * 2;
@@ -92,7 +115,7 @@ function init( section ) {
 		visH = 2 * camera.position.z * Math.tan( THREE.MathUtils.degToRad( camera.fov / 2 ) );
 		visW = visH * camera.aspect;
 		portrait = camera.aspect < 0.9;
-		fit = Math.min( 1, ( visW * 0.88 ) / 2.5, ( visH * ( portrait ? 0.55 : 0.72 ) ) / 2.6 );
+		fit = Math.min( 1, ( visW * 0.88 ) / Math.max( size.w, 2.2 ), ( visH * ( portrait ? 0.55 : 0.72 ) ) / ( size.h + 0.06 ) );
 	}
 	window.addEventListener( 'resize', resize );
 	resize();
@@ -461,6 +484,87 @@ function bumpCanvas() {
 	return c;
 }
 
+/* ==========================================================================
+   Modèle externe (.glb)
+   ========================================================================== */
+
+/**
+ * Options (assets/models/tee.json) :
+ *  rotateY    rotation (radians) pour mettre le devant face caméra (+Z)
+ *  color      couleur forcée du tissu (ex. "#f2f1ee"), remplace la texture d'origine
+ *  printY     centre du print, en fraction de la hauteur depuis le haut (défaut 0.30)
+ *  printX     décalage horizontal, en fraction de la hauteur (défaut -0.01)
+ *  printScale facteur de taille du print (défaut 1)
+ */
+async function loadModel( url, printUrl, opts, renderer ) {
+	const [ gltf, printTex ] = await Promise.all( [
+		new GLTFLoader().loadAsync( url ),
+		new THREE.TextureLoader().loadAsync( printUrl ),
+	] );
+
+	// Mise à l'échelle : même hauteur que le tee généré, centré sur l'origine.
+	const model = gltf.scene;
+	const holder = new THREE.Group();
+	const pivot = new THREE.Group();
+	pivot.rotation.y = opts.rotateY || 0;
+	pivot.add( model );
+	holder.add( pivot );
+	holder.updateMatrixWorld( true );
+	const box = new THREE.Box3().setFromObject( pivot );
+	const dim = box.getSize( new THREE.Vector3() );
+	const scale = SH / dim.y;
+	pivot.scale.setScalar( scale );
+	pivot.position.copy( box.getCenter( new THREE.Vector3() ).multiplyScalar( -scale ) );
+	holder.updateMatrixWorld( true );
+
+	// Tissu : sheen + double face (encolure, manches).
+	const meshes = [];
+	model.traverse( ( o ) => {
+		if ( ! o.isMesh ) return;
+		meshes.push( o );
+		const mats = Array.isArray( o.material ) ? o.material : [ o.material ];
+		const conv = mats.map( ( m ) => new THREE.MeshPhysicalMaterial( {
+			color: opts.color ? new THREE.Color( opts.color ) : m.color,
+			map: opts.color ? null : m.map,
+			normalMap: m.normalMap || null,
+			normalScale: m.normalScale || new THREE.Vector2( 1, 1 ),
+			roughnessMap: m.roughnessMap || null,
+			aoMap: m.aoMap || null,
+			roughness: Math.max( m.roughness ?? 0.85, 0.7 ),
+			metalness: 0,
+			sheen: 1,
+			sheenRoughness: 0.6,
+			sheenColor: new THREE.Color( 0xffffff ),
+			side: THREE.DoubleSide,
+		} ) );
+		o.material = Array.isArray( o.material ) ? conv : conv[ 0 ];
+	} );
+
+	// Print : décalque projeté sur la poitrine (rayon tiré depuis l'avant).
+	const H = SH, k = opts.printScale || 1;
+	const px = ( opts.printX ?? -0.01 ) * H;
+	const py = ( 0.5 - ( opts.printY ?? 0.3 ) ) * H;
+	const hit = new THREE.Raycaster( new THREE.Vector3( px, py, 20 ), new THREE.Vector3( 0, 0, -1 ) ).intersectObjects( meshes, false )[ 0 ];
+	if ( hit ) {
+		printTex.colorSpace = THREE.SRGBColorSpace;
+		printTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+		const w = 0.25 * H * k, h = w * ( printTex.image.height / printTex.image.width );
+		const decalMat = new THREE.MeshPhysicalMaterial( {
+			map: printTex, transparent: true, depthWrite: false, roughness: 0.75,
+			polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,
+		} );
+		// Le modèle peut être découpé en plusieurs maillages : on projette sur chacun.
+		for ( const m of meshes ) {
+			const g = new DecalGeometry( m, hit.point, new THREE.Euler( 0, 0, 0 ), new THREE.Vector3( w, h, 0.3 ) );
+			if ( g.attributes.position.count ) holder.add( new THREE.Mesh( g, decalMat ) );
+		}
+	}
+
+	const final = new THREE.Box3().setFromObject( holder ).getSize( new THREE.Vector3() );
+	holder.userData.size = { w: final.x, h: final.y };
+	return holder;
+}
+
 function buildTee( group, printImg, renderer ) {
 	const poly = outlineUV().map( ( [ u, v ] ) => [ toX( u ), toY( v ) ] );
 	const aniso = renderer.capabilities.getMaxAnisotropy();
@@ -571,3 +675,6 @@ function buildDust() {
 		blending: THREE.AdditiveBlending, depthWrite: false,
 	} ) );
 }
+
+const section = document.querySelector( '.tee3d' );
+if ( section ) init( section );

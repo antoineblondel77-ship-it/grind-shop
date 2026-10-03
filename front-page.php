@@ -38,7 +38,20 @@ $link    = $product ? $product->get_permalink() : $shop;
 	</div>
 </div>
 
-<section class="tee3d" aria-label="Le t-shirt en 3D" data-print="<?php echo grind_asset( 'img/print.png' ); ?>">
+<?php
+// Modèle 3D réaliste optionnel : assets/models/tee.glb (+ réglages dans tee.json).
+$model_dir  = get_template_directory() . '/assets/models/';
+$model_attr = '';
+if ( file_exists( $model_dir . 'tee.glb' ) ) {
+	$model_opts = file_exists( $model_dir . 'tee.json' ) ? file_get_contents( $model_dir . 'tee.json' ) : '{}';
+	$model_attr = sprintf(
+		' data-model="%s" data-model-options="%s"',
+		grind_asset( 'models/tee.glb?v=' . filemtime( $model_dir . 'tee.glb' ) ),
+		esc_attr( $model_opts )
+	);
+}
+?>
+<section class="tee3d" aria-label="Le t-shirt en 3D" data-print="<?php echo grind_asset( 'img/print.png' ); ?>" data-print-alpha="<?php echo grind_asset( 'img/print-alpha.png' ); ?>"<?php echo $model_attr; // phpcs:ignore -- échappé ci-dessus ?>>
 	<div class="tee3d__sticky">
 		<div class="tee3d__bgtext" aria-hidden="true"><span>Parental Advisory — Explicit Content — Parental Advisory</span></div>
 		<img class="tee3d__fallback" src="<?php echo grind_asset( 'img/tee-front.jpg' ); ?>" alt="T-shirt Parental Advisory, face avant">
