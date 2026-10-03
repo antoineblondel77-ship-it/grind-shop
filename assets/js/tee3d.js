@@ -6,6 +6,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/+esm';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js/+esm';
 import { DecalGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/geometries/DecalGeometry.js/+esm';
+import { MeshoptDecoder } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/libs/meshopt_decoder.module.js/+esm';
 
 
 function init( section ) {
@@ -498,7 +499,7 @@ function bumpCanvas() {
  */
 async function loadModel( url, printUrl, opts, renderer ) {
 	const [ gltf, printTex ] = await Promise.all( [
-		new GLTFLoader().loadAsync( url ),
+		new GLTFLoader().setMeshoptDecoder( MeshoptDecoder ).loadAsync( url ),
 		new THREE.TextureLoader().loadAsync( printUrl ),
 	] );
 
