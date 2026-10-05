@@ -66,11 +66,7 @@ function grind_demo_import( $file ) {
 }
 $dir     = get_stylesheet_directory();
 $front   = grind_demo_import( $dir . '/assets/img/tee-front.jpg' );
-$gallery = array();
-foreach ( array( 'grind-tee-porte-1', 'grind-tee-closeup', 'grind-tee-porte-2', 'grind-tee-porte-3' ) as $f ) {
-	$gallery[] = grind_demo_import( $dir . '/playground/img/' . $f . '.jpg' );
-}
-$gallery[] = grind_demo_import( $dir . '/assets/img/tee-front-light.jpg' );
+$gallery = array( grind_demo_import( $dir . '/assets/img/tee-front-light.jpg' ) );
 
 // Attribut "Taille".
 $attr_id = wc_attribute_taxonomy_id_by_name( 'pa_taille' );

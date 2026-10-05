@@ -77,7 +77,7 @@ $total = $product ? grind_total_stock( $product ) : null;
 				<p class="drop__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></p>
 				<div class="drop__desc"><?php echo wp_kses_post( wpautop( $product->get_short_description() ) ); ?></div>
 
-				<?php if ( $sizes ) : ?>
+				<?php if ( $sizes && ! $locked ) : ?>
 					<p class="label">Taille</p>
 					<div class="size-row">
 						<?php foreach ( $sizes as $slug => $s ) :
@@ -119,7 +119,15 @@ $total = $product ? grind_total_stock( $product ) : null;
 	<div class="grain"></div>
 	<div class="wrap">
 		<p class="eyebrow">Explicit content</p>
-		<p class="manifesto__text">Des toits du centre aux parkings <em>du sous-sol</em>, on porte ce qu'on vit.</p>
+		<div class="lyrics" role="img" aria-label="Faut que je grind, que je grind, ok. J'enlève le masque, le masque, ok. Je suis dans la trap, dans la trap, ok. J'ai pas de part mais tu veux croquer.">
+			<div class="lyrics__lines" aria-hidden="true">
+				<p class="lyrics__line">Faut que je grind que je grind <em>ok</em></p>
+				<p class="lyrics__line">J'enlève le masque le masque <em>ok</em></p>
+				<p class="lyrics__line">Je suis dans la trap dans la trap <em>ok</em></p>
+				<p class="lyrics__line">J'ai pas de part mais tu veux <em>croquer</em></p>
+			</div>
+			<p class="lyrics__title" aria-hidden="true"><span class="lyrics__grind">GRIND</span><span class="lyrics__artist">GUTS</span></p>
+		</div>
 	</div>
 </section>
 
@@ -154,7 +162,8 @@ $total = $product ? grind_total_stock( $product ) : null;
 </section>
 
 <section class="cta-band">
-	<div class="grain"></div>
+	<img src="<?php echo grind_asset( 'img/lb-closeup.jpg' ); ?>" alt="" loading="lazy">
+	<div class="cta-band__shade"></div>
 	<div class="cta-band__content">
 		<h2 class="cta-band__title">GRIND</h2>
 		<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>">Récupérer le tee</a>

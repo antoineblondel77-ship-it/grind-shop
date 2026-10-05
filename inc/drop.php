@@ -40,7 +40,36 @@ function grind_drop_timestamp() {
 /** La boutique est-elle encore fermée ? */
 function grind_drop_locked() {
 	$ts = grind_drop_timestamp();
-	return $ts && time() < $ts;
+	return $ts && time() < $ts && ! grind_drop_preview();
+}
+
+/* ---------- Aperçu admin : le site tel qu'à la fin du chrono ---------- */
+
+// ?apercu-drop=1 active l'aperçu (cookie de session), ?apercu-drop=0 le coupe.
+add_action( 'init', function () {
+	if ( ! isset( $_GET['apercu-drop'] ) || ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	$on = '1' === $_GET['apercu-drop'];
+	setcookie( 'grind_apercu_drop', $on ? '1' : '', $on ? 0 : 1, COOKIEPATH, COOKIE_DOMAIN );
+	$_COOKIE['grind_apercu_drop'] = $on ? '1' : '';
+} );
+
+/** Aperçu actif ? (admins uniquement) */
+function grind_drop_preview() {
+	return ! empty( $_COOKIE['grind_apercu_drop'] ) && current_user_can( 'manage_options' );
+}
+
+/** Bandeau rappelant que l'aperçu est actif. */
+function grind_drop_preview_bar() {
+	$ts = grind_drop_timestamp();
+	if ( ! grind_drop_preview() || ! $ts || time() >= $ts ) {
+		return;
+	}
+	printf(
+		'<div class="preview-bar">Aperçu : drop ouvert (visible par toi seul) <a href="%s">Quitter l\'aperçu</a></div>',
+		esc_url( add_query_arg( 'apercu-drop', '0' ) )
+	);
 }
 
 /** Date lisible : « lundi 6 octobre à 20h ». */
@@ -67,16 +96,20 @@ add_action( 'woocommerce_single_product_summary', function () {
 }, 1 );
 
 function grind_drop_box() {
-	global $product;
 	echo '<div class="drop-box">';
 	echo '<p class="eyebrow">Ouverture ' . esc_html( grind_drop_label() ) . '</p>';
 	grind_countdown();
-	if ( $product ) {
-		grind_size_preview( $product );
-	}
 	grind_waitlist_form( 'Me prévenir', 'produit' );
 	echo '</div>';
 }
+
+// Les tailles restent cachées jusqu'à l'ouverture (onglet « Informations complémentaires »).
+add_filter( 'woocommerce_product_tabs', function ( $tabs ) {
+	if ( grind_drop_locked() ) {
+		unset( $tabs['additional_information'] );
+	}
+	return $tabs;
+}, 20 );
 
 /* ---------- Composants ---------- */
 
@@ -161,25 +194,6 @@ function grind_stock_note( $s ) {
 		return 'Plus que ' . $s['qty'];
 	}
 	return '';
-}
-
-/** Tailles en lecture seule (boutique fermée) avec l'état du stock. */
-function grind_size_preview( $product ) {
-	$sizes = grind_size_stock( $product );
-	if ( ! $sizes ) {
-		return;
-	}
-	echo '<div class="size-row size-row--preview">';
-	foreach ( $sizes as $s ) {
-		$note = grind_stock_note( $s );
-		printf(
-			'<span class="size-chip%s">%s%s</span>',
-			$s['in_stock'] ? ( $note ? ' is-low' : '' ) : ' is-out',
-			esc_html( $s['name'] ),
-			$note ? '<em>' . esc_html( $note ) . '</em>' : ''
-		);
-	}
-	echo '</div>';
 }
 
 /* ---------- Liste d'attente : stockage + API ---------- */

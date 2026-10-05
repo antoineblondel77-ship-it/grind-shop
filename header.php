@@ -11,6 +11,7 @@
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 <a class="skip-link" href="#content">Aller au contenu</a>
+<?php grind_drop_preview_bar(); ?>
 
 <div class="announce" aria-label="Annonces">
 	<div class="announce__track">

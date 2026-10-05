@@ -45,6 +45,61 @@
 		} );
 	}
 
+	// Paroles : chaque mot devient un span avec son délai ; en boucle, les paroles
+	// alternent avec GRIND / GUTS tant que la section est à l'écran.
+	var lyrics = document.querySelector( '.lyrics' );
+	if ( lyrics && 'IntersectionObserver' in window && window.matchMedia( '(prefers-reduced-motion: no-preference)' ).matches ) {
+		var t = 400; // laisse GRIND s'effacer avant le premier mot
+		lyrics.querySelectorAll( '.lyrics__line' ).forEach( function ( line ) {
+			[ line ].concat( Array.prototype.slice.call( line.querySelectorAll( 'em' ) ) ).forEach( function ( el ) {
+				Array.prototype.slice.call( el.childNodes ).forEach( function ( node ) {
+					if ( node.nodeType !== 3 ) return;
+					var frag = document.createDocumentFragment();
+					node.textContent.split( /(\s+)/ ).forEach( function ( part ) {
+						if ( ! part ) return;
+						if ( /^\s+$/.test( part ) ) {
+							frag.appendChild( document.createTextNode( part ) );
+							return;
+						}
+						var w = document.createElement( 'span' );
+						w.className = 'lyrics__word';
+						w.textContent = part;
+						frag.appendChild( w );
+					} );
+					el.replaceChild( frag, node );
+				} );
+			} );
+			line.querySelectorAll( '.lyrics__word' ).forEach( function ( w ) {
+				w.style.setProperty( '--d', t + 'ms' );
+				t += 170;
+			} );
+			t += 450; // respiration entre deux mesures
+		} );
+		var timer = 0;
+		var playLyrics = function () {
+			lyrics.classList.remove( 'is-title', 'is-on' );
+			void lyrics.offsetWidth; // relance les animations
+			lyrics.classList.add( 'is-on' );
+			timer = setTimeout( showTitle, t + 1800 );
+		};
+		var showTitle = function () {
+			lyrics.classList.add( 'is-title' );
+			timer = setTimeout( playLyrics, 3800 );
+		};
+		lyrics.classList.add( 'lyrics--anim' );
+		new IntersectionObserver( function ( entries ) {
+			entries.forEach( function ( e ) {
+				if ( e.intersectionRatio >= 0.5 && ! timer ) {
+					playLyrics();
+				} else if ( ! e.isIntersecting ) {
+					clearTimeout( timer );
+					timer = 0;
+					lyrics.classList.remove( 'is-on', 'is-title' );
+				}
+			} );
+		}, { threshold: [ 0, 0.5 ] } ).observe( lyrics );
+	}
+
 	// Fiche produit : boutons de taille à la place du <select>, avec l'état du stock.
 	var LOW = 5;
 	document.querySelectorAll( '.variations_form select' ).forEach( function ( select ) {
