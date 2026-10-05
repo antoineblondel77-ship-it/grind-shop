@@ -27,13 +27,8 @@ $locked  = grind_drop_locked();
 		<?php else : ?>
 			<div class="hero__ctas">
 				<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>">Shop le drop</a>
-				<a class="btn btn--ghost" href="#lookbook">Lookbook</a>
 			</div>
 		<?php endif; ?>
-		<button type="button" class="play-clip" data-player-open aria-haspopup="dialog">
-			<span class="play-clip__icon" aria-hidden="true"></span>
-			<span>Voir le clip</span>
-		</button>
 	</div>
 
 	<div class="hero__corner hero__corner--l">Toulouse — 31</div>
@@ -158,37 +153,8 @@ $total = $product ? grind_total_stock( $product ) : null;
 	</div>
 </section>
 
-<section id="lookbook" class="lookbook wrap">
-	<header class="section-head">
-		<p class="eyebrow">Lookbook</p>
-		<h2 class="display display--md">Vu dans le clip</h2>
-	</header>
-
-	<div class="lb-grid">
-		<?php
-		$shots = array(
-			array( 'lb-antenna', 'Le tee, porté', 'lb--tall' ),
-			array( 'lb-rooftop', 'Sur les toits', 'lb--wide' ),
-			array( 'lb-tee', 'Détail du print', '' ),
-			array( 'lb-parking', 'Niveau -2', '' ),
-			array( 'lb-toulouse', 'La ville rose', 'lb--wide' ),
-			array( 'lb-arches', 'Sous les arches', '' ),
-			array( 'lb-fisheye', 'Sous-sol', '' ),
-			array( 'lb-profile', 'Vue sur la ville', 'lb--wide' ),
-		);
-		foreach ( $shots as $s ) :
-			?>
-			<figure class="lb <?php echo esc_attr( $s[2] ); ?>">
-				<img src="<?php echo grind_asset( 'img/' . $s[0] . '.jpg' ); ?>" alt="<?php echo esc_attr( $s[1] ); ?>" loading="lazy">
-				<figcaption><?php echo esc_html( $s[1] ); ?></figcaption>
-			</figure>
-		<?php endforeach; ?>
-	</div>
-</section>
-
 <section class="cta-band">
-	<img src="<?php echo grind_asset( 'img/lb-closeup.jpg' ); ?>" alt="" loading="lazy">
-	<div class="cta-band__shade"></div>
+	<div class="grain"></div>
 	<div class="cta-band__content">
 		<h2 class="cta-band__title">GRIND</h2>
 		<a class="btn btn--red" href="<?php echo esc_url( $link ); ?>">Récupérer le tee</a>

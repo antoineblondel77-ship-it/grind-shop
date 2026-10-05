@@ -17,7 +17,7 @@
 				<p class="footer-title">Boutique</p>
 				<ul>
 					<?php if ( function_exists( 'wc_get_page_permalink' ) ) : ?>
-						<li><a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>">Tous les produits</a></li>
+						<li><a href="<?php echo esc_url( grind_product_url() ); ?>">Le tee</a></li>
 						<li><a href="<?php echo esc_url( wc_get_cart_url() ); ?>">Panier</a></li>
 						<li><a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>">Mon compte</a></li>
 					<?php endif; ?>
@@ -49,8 +49,6 @@
 		</div>
 	</div>
 </footer>
-
-<?php if ( is_front_page() ) get_template_part( 'parts/player' ); ?>
 
 <?php wp_footer(); ?>
 </body>

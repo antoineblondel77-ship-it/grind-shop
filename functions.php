@@ -43,7 +43,6 @@ add_action( 'wp_enqueue_scripts', function () {
 	wp_register_script_module( 'grind-tee-core', $uri . '/assets/js/tee-core.js', array(), GRIND_VERSION );
 	if ( is_front_page() ) {
 		wp_enqueue_script_module( 'grind-tee3d', $uri . '/assets/js/tee3d.js', array( 'grind-tee-core' ), GRIND_VERSION );
-		wp_enqueue_script_module( 'grind-player', $uri . '/assets/js/player.js', array(), GRIND_VERSION );
 	}
 	if ( function_exists( 'is_product' ) && is_product() ) {
 		wp_enqueue_script_module( 'grind-viewer', $uri . '/assets/js/tee-viewer.js', array( 'grind-tee-core' ), GRIND_VERSION );
@@ -86,11 +85,9 @@ function grind_video( $file ) {
 
 /** Liens par défaut si aucun menu n'est assigné. */
 function grind_menu_fallback() {
-	$shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
 	echo '<ul class="nav-list">';
-	echo '<li><a href="' . esc_url( $shop ) . '">Boutique</a></li>';
+	echo '<li><a href="' . esc_url( grind_product_url() ) . '">Boutique</a></li>';
 	echo '<li><a href="' . esc_url( home_url( '/#drop' ) ) . '">Drop 001</a></li>';
-	echo '<li><a href="' . esc_url( home_url( '/#lookbook' ) ) . '">Lookbook</a></li>';
 	echo '</ul>';
 }
 
@@ -113,7 +110,25 @@ function grind_featured_product() {
 	return $products ? $products[0] : null;
 }
 
+/** Lien vers la fiche du produit vedette (accueil s'il n'y en a pas). */
+function grind_product_url() {
+	$product = grind_featured_product();
+	return $product ? $product->get_permalink() : home_url( '/' );
+}
+
 /* ---------- WooCommerce ---------- */
+
+// Un seul article : la boutique et les catégories renvoient directement sur sa fiche.
+add_action( 'template_redirect', function () {
+	if ( ! function_exists( 'is_shop' ) || ! ( is_shop() || is_product_taxonomy() ) ) {
+		return;
+	}
+	$product = grind_featured_product();
+	if ( $product ) {
+		wp_safe_redirect( $product->get_permalink() );
+		exit;
+	}
+} );
 
 // Pas de sidebar ni de fil d'Ariane par défaut.
 remove_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
